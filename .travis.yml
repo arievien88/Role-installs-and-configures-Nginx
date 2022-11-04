@@ -1,0 +1,32 @@
+language: python
+python: "2.7"
+sudo: required
+services:
+  - docker
+
+before_install:
+  - sudo apt-get update -qq
+
+install:
+  - pip install ansible
+  - printf "[defaults]\nroles_path = ../" > ansible.cfg
+  - docker run --name travis-community -d dpujadas/baseimage:python2
+  - docker run --name travis-openresty -d dpujadas/baseimage:python2
+
+script:
+  # Check the syntax
+  - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
+  # Check role success
+  - ansible-playbook tests/test.yml -i tests/inventory
+  # Check idempotence
+  - >
+    ansible-playbook tests/test.yml -i tests/inventory
+    | grep -q 'changed=0.*failed=0'
+    && (echo 'Idempotence test: pass' && exit 0)
+    || (echo 'Idempotence test: fail' && exit 1)
+  # Check nginx-community is up and running
+  - >
+    [ "$(curl -s -w '%{http_code}' -o /dev/null http://$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' travis-community)/)" == "200" ]
+  # Check nginx-openresty is up and running
+  - >
+    [ "$(curl -s -w '%{http_code}' -o /dev/null http://$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' travis-openresty)/)" == "200" ]
