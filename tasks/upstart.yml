@@ -1,0 +1,14 @@
+- name: Create init script
+  template:
+    src: 'upstart-script.j2'
+    dest: '/etc/init.d/nginx'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  when: nginx_source == 'openresty'
+
+- name: Ensure nginx is started and enabled at boot
+  service:
+    name: 'nginx'
+    state: 'started'
+    enabled: 'yes'
