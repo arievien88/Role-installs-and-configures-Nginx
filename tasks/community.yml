@@ -1,0 +1,49 @@
+---
+# tasks file for nginx-community
+
+- name: Include the community variables
+  include_vars: 'community.yml'
+
+- name: Add nginx apt key
+  apt_key:
+    url: 'http://nginx.org/keys/nginx_signing.key'
+    state: 'present'
+  tags:
+    - nginx-community
+
+- name: Add nginx repos
+  apt_repository:
+    state: 'present'
+    repo: '{{ item }}'
+    update_cache: 'yes'
+  with_items: '{{ nginx_community_repos }}'
+  tags:
+    - nginx-community
+
+- name: Prevent nginx to start on install
+  copy:
+    content: |-
+      #!/bin/sh
+      exit 101
+    dest: '/usr/sbin/policy-rc.d'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  changed_when: False
+  tags:
+    - nginx-community
+
+- name: Install the latest nginx package
+  apt:
+    name: 'nginx'
+    state: 'latest'
+  tags:
+    - nginx-community
+
+- name: Remove policy-rc.d
+  file:
+    name: '/usr/sbin/policy-rc.d'
+    state: 'absent'
+  changed_when: False
+  tags:
+    - nginx-community
