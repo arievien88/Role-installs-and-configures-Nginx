@@ -1,0 +1,55 @@
+---
+# tasks file for openresty
+
+- name: Include the openresty variables
+  include_vars: 'openresty.yml'
+
+- name: Install required packages
+  apt:
+    name: '{{ item }}'
+    state: 'installed'
+  with_items: '{{ nginx_openresty_required_packages }}'
+  tags:
+    - nginx-openresty
+
+- name: Uncompress ngx_openresty
+  unarchive:
+    src: '{{ nginx_openresty_url }}'
+    dest: '/tmp'
+    copy: 'no'
+    creates: '/tmp/{{ nginx_openresty_package }}'
+  register: nginx_openresty_download
+  tags:
+    - nginx-openresty
+
+- name: Compile and install openresty
+  shell: >
+    ./configure {{ nginx_openresty_configure_options|join(" ") }} && make && make install
+  args:
+    chdir: '/tmp/{{ nginx_openresty_package }}'
+    creates: '/usr/local/openresty/nginx/sbin/nginx'
+  when: nginx_openresty_download.changed
+  tags:
+    - nginx-openresty
+
+- name: Create config link
+  file:
+    state: 'link'
+    src: '/usr/local/openresty/nginx/conf'
+    path: '/etc/nginx'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  tags:
+    - nginx-openresty
+
+- name: Create logs link
+  file:
+    state: link
+    src: '/usr/local/openresty/nginx/logs'
+    path: '/var/log/nginx'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  tags:
+    - nginx-openresty
