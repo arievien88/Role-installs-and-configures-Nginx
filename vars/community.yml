@@ -1,0 +1,4 @@
+nginx_community_repos:
+  - 'deb http://nginx.org/packages/{{ nginx_community_version + "/" if nginx_community_version != "stable" else "" }}ubuntu/ {{ ansible_lsb.codename }} nginx'
+  - 'deb-src http://nginx.org/packages/{{ nginx_community_version + "/" if nginx_community_version != "stable" else "" }}ubuntu/ {{ ansible_lsb.codename }} nginx'
+nginx_bin_path: '/usr/sbin'
