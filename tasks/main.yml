@@ -1,0 +1,70 @@
+---
+# tasks file for nginx
+
+- include: '{{ nginx_source }}.yml'
+  tags:
+    - nginx
+
+- name: Ensure included directories exist
+  file:
+    state: 'directory'
+    path: '/etc/nginx/{{ item }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  with_items:
+    - sites-enabled
+    - conf.d
+  tags:
+    - nginx
+
+- name: Configure nginx server
+  template:
+    src: 'nginx.conf.j2'
+    dest: '/etc/nginx/nginx.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  notify: restart nginx
+  tags:
+    - nginx
+
+- name: Enable custom configurations
+  template:
+    src: '{{ item.template }}'
+    dest: '/etc/nginx/conf.d/{{ item.conf_name }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  with_items: '{{ nginx_confs }}'
+  notify: restart nginx
+  tags:
+    - nginx
+
+- name: Disable default sites
+  file:
+    state: 'absent'
+    path: '/etc/nginx/conf.d/{{ item }}'
+  with_items:
+    - default.conf
+    - example_ssl.conf
+  when: not nginx_keep_default_sites
+  notify: restart nginx
+  tags:
+    - nginx
+
+- name: Configure sites
+  template:
+    src: '{{ item.template }}'
+    dest: '/etc/nginx/sites-enabled/{{ item.filename|default(item.server_name) }}.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  with_items: '{{ nginx_sites }}'
+  notify: restart nginx
+  tags:
+    - nginx
+
+- include: '{{ nginx_init_system }}.yml'
+  tags:
+    - nginx
