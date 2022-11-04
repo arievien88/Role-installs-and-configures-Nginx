@@ -1,0 +1,21 @@
+galaxy_info:
+  author: Iki Arif
+  description: Ansible role to install nginx on Ubuntu server
+
+  license: MIT
+
+  min_ansible_version: 2.0
+
+  platforms:
+  - name: Ubuntu
+    versions:
+      - precise
+      - trusty
+      - wily
+      - xenial
+
+  galaxy_tags:
+    - ubuntu
+    - nginx
+
+dependencies: []
