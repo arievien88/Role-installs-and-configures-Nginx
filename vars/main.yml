@@ -1,0 +1,14 @@
+---
+# vars file for nginx
+
+nginx_pid_file: '/var/run/nginx.pid'
+
+nginx_main_directives:
+  sendfile: '{{ nginx_sendfile }}'
+  tcp_nopush: '{{ nginx_tcp_nopush }}'
+  tcp_nodelay: '{{ nginx_tcp_nodelay }}'
+  keepalive_timeout: '{{ nginx_keepalive_timeout }}'
+  types_hash_max_size: '{{ nginx_types_hash_max_size }}'
+  default_type: '{{ nginx_default_type }}'
+  access_log: '{{ nginx_access_log }}'
+  error_log: '{{ nginx_error_log }}'
