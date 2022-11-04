@@ -1,0 +1,55 @@
+user {{ nginx_user }} {{ nginx_group }};
+worker_processes {{ nginx_worker_processes }};
+pid {{ nginx_pid_file }};
+
+events {
+    worker_connections {{ nginx_worker_connections }};
+}
+
+http {
+    {% for key, value in nginx_main_directives.iteritems() -%}
+    {{ key }} {{ value }};
+    {% endfor %}
+
+    {% if nginx_custom_directives is defined -%}
+    {% for key, value in nginx_custom_directives.iteritems() -%}
+    {{ key }} {{ value }};
+    {% endfor %}
+    {% endif %}
+
+    {% if nginx_gzip -%}
+    gzip on;
+    gzip_disable "msie6";
+    gzip_proxied any;
+    gzip_types
+        text/plain
+        text/css
+        text/js
+        text/xml
+        text/javascript
+        application/javascript
+        application/x-javascript
+        application/json
+        application/xml
+        application/xml+rss;
+    {% endif %}
+
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for"';
+    log_format json '{ "time": "$time_iso8601", '
+                    '"remote_addr": "$remote_addr", '
+                    '"remote_user": "$remote_user", '
+                    '"body_bytes_sent": "$body_bytes_sent", '
+                    '"request_time": "$request_time", '
+                    '"status": "$status", '
+                    '"request": "$request", '
+                    '"request_method": "$request_method", '
+                    '"http_referrer": "$http_referer", '
+                    '"http_user_agent": "$http_user_agent", '
+                    '"http_x_forwarded_for": "$http_x_forwarded_for" }';
+
+    include /etc/nginx/mime.types;
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*.conf;
+}
