@@ -1,0 +1,32 @@
+---
+- hosts: travis-community
+  connection: docker
+  remote_user: root
+  vars:
+    custom_directives:
+      client_max_body_size: '20M'
+  roles:
+    - {
+      role: ansible-role-nginx,
+      nginx_source: 'community',
+      nginx_community_version: 'mainline',
+      nginx_init_system: 'runit',
+      nginx_keep_default_sites: True,
+      nginx_custom_directives: '{{ custom_directives }}'
+    }
+
+- hosts: travis-openresty
+  connection: docker
+  remote_user: root
+  vars:
+    sites:
+      - template: 'tests/default.conf.j2'
+        server_name: 'default'
+  roles:
+    - {
+      role: ansible-role-nginx,
+      nginx_source: 'openresty',
+      nginx_init_system: 'runit',
+      nginx_keep_default_sites: True,
+      nginx_sites: '{{ sites }}'
+    }
