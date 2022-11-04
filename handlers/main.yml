@@ -1,0 +1,30 @@
+---
+# handlers file for nginx
+
+- name: restart nginx
+  shell: >
+    /bin/true
+  notify: 'restart nginx {{ nginx_init_system }}'
+
+- name: restart nginx upstart
+  service:
+    name: 'nginx'
+    state: 'restarted'
+
+- name: restart nginx runit
+  shell: >
+    sleep 5 && sv restart nginx
+
+- name: reload nginx
+  shell: >
+    /bin/true
+  notify: 'reload nginx {{ nginx_init_system }}'
+
+- name: reload nginx upstart
+  service:
+    name: 'nginx'
+    state: 'reloaded'
+
+- name: reload nginx runit
+  shell: >
+    sleep 5 && sv reload nginx
