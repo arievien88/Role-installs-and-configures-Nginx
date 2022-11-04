@@ -1,0 +1,10 @@
+nginx_openresty_package: '{{ "ngx_" if nginx_openresty_version|version_compare("1.9.7.2", "<=") else "" }}openresty-{{ nginx_openresty_version }}'
+nginx_openresty_url: 'http://openresty.org/download/{{ nginx_openresty_package }}.tar.gz'
+nginx_openresty_required_packages:
+  - libreadline-dev
+  - libncurses5-dev
+  - libpcre3-dev
+  - libssl-dev
+  - make
+  - build-essential
+nginx_bin_path: '/usr/local/openresty/nginx/sbin'
